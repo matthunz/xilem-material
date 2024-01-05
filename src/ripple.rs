@@ -1,12 +1,12 @@
 use std::time::{Duration, Instant};
 use xilem::{
     vello::{
-        kurbo::{Affine, Circle, Point, Size},
-        peniko::{BlendMode, Brush, Color},
+        kurbo::{Affine, Circle, Point},
+        peniko::{Brush, Color},
     },
     view::{Id, View},
     widget::{ChangeFlags, Event, Widget},
-    IdPath, MessageResult,
+    MessageResult,
 };
 
 pub struct Ripple {
@@ -28,8 +28,7 @@ impl<T, A> View<T, A> for Ripple {
     type Element = RippleWidget;
 
     fn build(&self, cx: &mut xilem::view::Cx) -> (Id, Self::State, Self::Element) {
-        let (id, elem) = cx.with_new_id(|cx| RippleWidget {
-            id_path: cx.id_path().clone(),
+        let (id, elem) = cx.with_new_id(|_cx| RippleWidget {
             start: None,
             duration: self.duration,
         });
@@ -60,9 +59,17 @@ impl<T, A> View<T, A> for Ripple {
 }
 
 pub struct RippleWidget {
-    id_path: IdPath,
     start: Option<(Instant, Point)>,
     duration: Duration,
+}
+
+impl Default for RippleWidget {
+    fn default() -> Self {
+        Self {
+            start: None,
+            duration: Duration::from_millis(300),
+        }
+    }
 }
 
 impl Widget for RippleWidget {
@@ -88,37 +95,15 @@ impl Widget for RippleWidget {
     fn layout(
         &mut self,
         _cx: &mut xilem::widget::LayoutCx,
-        _bc: &xilem::widget::BoxConstraints,
+        bc: &xilem::widget::BoxConstraints,
     ) -> xilem::vello::kurbo::Size {
-        Size::new(200., 200.)
+        bc.max()
     }
 
     fn accessibility(&mut self, _cx: &mut xilem::widget::AccessCx) {}
 
-    fn paint(
-        &mut self,
-        _cx: &mut xilem::widget::PaintCx,
-        builder: &mut xilem::vello::SceneBuilder,
-    ) {
-        let max_radius = 100.;
-
-        builder.push_layer(
-            BlendMode::new(
-                xilem::vello::peniko::Mix::Clip,
-                xilem::vello::peniko::Compose::Plus,
-            ),
-            1.,
-            Affine::default(),
-            &Circle::new((max_radius / 2., max_radius / 2.), max_radius),
-        );
-
-        builder.fill(
-            xilem::vello::peniko::Fill::EvenOdd,
-            Affine::default(),
-            &Brush::Solid(Color::rgb(0., 0., 1.)),
-            None,
-            &Circle::new((max_radius / 2., max_radius / 2.), max_radius),
-        );
+    fn paint(&mut self, cx: &mut xilem::widget::PaintCx, builder: &mut xilem::vello::SceneBuilder) {
+        let max_radius = cx.size().max_side();
 
         if let Some((start, pos)) = self.start {
             let scale = Instant::now()
@@ -127,10 +112,10 @@ impl Widget for RippleWidget {
                 .as_secs_f64()
                 / self.duration.as_secs_f64();
             let radius = max_radius.min(scale * max_radius);
-            let opacity = if scale < 0.5 {
+            let opacity = if scale < 0.3 {
                 scale
             } else {
-                0.5f64.min(1. - scale)
+                0.3f64.min(1. - scale)
             };
 
             builder.fill(
@@ -141,7 +126,5 @@ impl Widget for RippleWidget {
                 &Circle::new((pos.x, pos.y), radius),
             );
         }
-
-        builder.pop_layer();
     }
 }

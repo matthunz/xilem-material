@@ -1,10 +1,11 @@
+use crate::RippleWidget;
 use xilem::{
     vello::{
         kurbo::{Affine, Point, RoundedRect, Size},
-        peniko::Color,
+        peniko::{BlendMode, Color},
     },
     view::{Id, View, ViewMarker},
-    widget::{ChangeFlags, Pod, Widget},
+    widget::{ChangeFlags, Event, EventCx, Pod, Widget},
     MessageResult,
 };
 
@@ -83,6 +84,7 @@ where
 pub struct ButtonWidget {
     content: Pod,
     style: ButtonStyle,
+    ripple: RippleWidget,
 }
 
 impl ButtonWidget {
@@ -90,12 +92,15 @@ impl ButtonWidget {
         Self {
             content: Pod::new(content),
             style,
+            ripple: RippleWidget::default(),
         }
     }
 }
 
 impl Widget for ButtonWidget {
-    fn event(&mut self, _cx: &mut xilem::widget::EventCx, _event: &xilem::widget::Event) {}
+    fn event(&mut self, cx: &mut EventCx, event: &Event) {
+        self.ripple.event(cx, event)
+    }
 
     fn lifecycle(
         &mut self,
@@ -128,13 +133,28 @@ impl Widget for ButtonWidget {
     fn accessibility(&mut self, _cx: &mut xilem::widget::AccessCx) {}
 
     fn paint(&mut self, cx: &mut xilem::widget::PaintCx, builder: &mut xilem::vello::SceneBuilder) {
+        let rect = RoundedRect::new(0., 0., cx.size().width, cx.size().height, self.style.shape);
         builder.fill(
             xilem::vello::peniko::Fill::EvenOdd,
             Affine::default(),
             &Color::GREEN,
             None,
-            &RoundedRect::new(0., 0., cx.size().width, cx.size().height, self.style.shape),
+            &rect,
         );
-        self.content.paint(cx, builder)
+
+        builder.push_layer(
+            BlendMode::new(
+                xilem::vello::peniko::Mix::Clip,
+                xilem::vello::peniko::Compose::Plus,
+            ),
+            1.,
+            Affine::default(),
+            &rect,
+        );
+
+        self.ripple.paint(cx, builder);
+        self.content.paint(cx, builder);
+
+        builder.pop_layer()
     }
 }
