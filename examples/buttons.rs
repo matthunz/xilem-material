@@ -1,16 +1,16 @@
 use xilem::{
     view::{LinearLayout, View},
-    App, AppLauncher,
+    App, AppLauncher, Axis,
 };
-use xilem_material::{Button, Text};
+use xilem_material::{Button, RadioButton, Text};
 
 fn app(_: &mut ()) -> impl View<()> {
     LinearLayout::new(
         (
-            Text::builder().font_size(100.).content("Large").build(),
             Button::new(Text::builder().font_size(24.).content("Filled").build()),
+            RadioButton::default(),
         ),
-        xilem::Axis::Vertical,
+        Axis::Vertical,
     )
 }
 

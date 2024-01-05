@@ -1,6 +1,6 @@
 use xilem::{
     view::{LinearLayout, View},
-    App, AppLauncher,
+    App, AppLauncher, Axis,
 };
 use xilem_material::Text;
 
@@ -11,7 +11,7 @@ fn app(_: &mut ()) -> impl View<()> {
             Text::builder().font_size(60.).content("Medium").build(),
             Text::builder().font_size(20.).content("Small").build(),
         ),
-        xilem::Axis::Vertical,
+        Axis::Vertical,
     )
 }
 
