@@ -6,7 +6,7 @@ use xilem::{
     },
     view::{Id, View},
     widget::{ChangeFlags, Event, Widget},
-    IdPath, Message, MessageResult,
+    IdPath, MessageResult,
 };
 
 pub struct Ripple {
@@ -38,21 +38,21 @@ impl<T, A> View<T, A> for Ripple {
 
     fn rebuild(
         &self,
-        cx: &mut xilem::view::Cx,
-        prev: &Self,
-        id: &mut Id,
-        state: &mut Self::State,
-        element: &mut Self::Element,
+        _cx: &mut xilem::view::Cx,
+        _prev: &Self,
+        _id: &mut Id,
+        _state: &mut Self::State,
+        _element: &mut Self::Element,
     ) -> xilem::widget::ChangeFlags {
         ChangeFlags::PAINT
     }
 
     fn message(
         &self,
-        id_path: &[Id],
+        _id_path: &[Id],
         state: &mut Self::State,
         message: Box<dyn std::any::Any>,
-        app_state: &mut T,
+        _app_state: &mut T,
     ) -> MessageResult<A> {
         *state = *message.downcast().unwrap();
         MessageResult::RequestRebuild
@@ -76,25 +76,31 @@ impl Widget for RippleWidget {
         }
     }
 
-    fn lifecycle(&mut self, cx: &mut xilem::widget::LifeCycleCx, event: &xilem::widget::LifeCycle) {
+    fn lifecycle(
+        &mut self,
+        _cx: &mut xilem::widget::LifeCycleCx,
+        _event: &xilem::widget::LifeCycle,
+    ) {
     }
 
-    fn update(&mut self, cx: &mut xilem::widget::UpdateCx) {}
+    fn update(&mut self, _cx: &mut xilem::widget::UpdateCx) {}
 
     fn layout(
         &mut self,
-        cx: &mut xilem::widget::LayoutCx,
-        bc: &xilem::widget::BoxConstraints,
+        _cx: &mut xilem::widget::LayoutCx,
+        _bc: &xilem::widget::BoxConstraints,
     ) -> xilem::vello::kurbo::Size {
         Size::new(200., 200.)
     }
 
-    fn accessibility(&mut self, cx: &mut xilem::widget::AccessCx) {}
+    fn accessibility(&mut self, _cx: &mut xilem::widget::AccessCx) {}
 
-    fn paint(&mut self, cx: &mut xilem::widget::PaintCx, builder: &mut xilem::vello::SceneBuilder) {
+    fn paint(
+        &mut self,
+        _cx: &mut xilem::widget::PaintCx,
+        builder: &mut xilem::vello::SceneBuilder,
+    ) {
         let max_radius = 100.;
-
-     
 
         builder.push_layer(
             BlendMode::new(
